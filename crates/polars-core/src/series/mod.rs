@@ -813,6 +813,7 @@ impl Series {
     /// If the [`DataType`] is one of `{Int8, UInt8, Int16, UInt16}` the `Series` is
     /// first cast to `Int64` to prevent overflow issues.
     pub fn sum_reduce(&self) -> PolarsResult<Scalar> {
+        println!("in sum reduce {}", self.dtype());
         use DataType::*;
         match self.dtype() {
             Int8 | UInt8 | Int16 | UInt16 => self.cast(&Int64).unwrap().sum_reduce(),

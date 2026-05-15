@@ -45,11 +45,18 @@ fn sum<T>(array: &PrimitiveArray<T>) -> T
 where
     T: NumericNative + NativeType + WrappingSum,
 {
+    println!(
+        "fn sum<T>: len={}, null_count={}",
+        array.len(),
+        array.null_count()
+    );
     if array.null_count() == array.len() {
+        println!("fn sum<T>: all null, returning default");
         return T::default();
     }
 
     if T::is_float() {
+        println!("fn sum<T>: float path");
         unsafe {
             if T::is_f16() {
                 let f16_arr =
@@ -72,6 +79,7 @@ where
             }
         }
     } else {
+        println!("fn sum<T>: integer path -> wrapping_sum_arr");
         wrapping_sum_arr(array)
     }
 }
@@ -83,6 +91,11 @@ where
     PrimitiveArray<T::Native>: for<'a> MinMaxKernel<Scalar<'a> = T::Native>,
 {
     fn sum(&self) -> Option<T::Native> {
+        println!(
+            "ChunkAgg::sum: chunks={}, null_count={}",
+            self.chunks().len(),
+            self.null_count()
+        );
         Some(
             self.downcast_iter()
                 .map(sum)
@@ -262,6 +275,7 @@ where
     PrimitiveArray<T::Native>: for<'a> MinMaxKernel<Scalar<'a> = T::Native>,
 {
     fn sum_reduce(&self) -> Scalar {
+        println!("ChunkAggSeries::sum_reduce for ChunkedArray");
         let v: Option<T::Native> = self.sum();
         Scalar::new(T::get_static_dtype(), v.into())
     }

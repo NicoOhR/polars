@@ -84,17 +84,12 @@ where
     T: NativeType + WrappingAdd + Zero + crate::SimdPrimitive,
 {
     fn wrapping_sum(vals: &[Self]) -> Self {
-        println!(
-            "wrapping_sum (no validity, scalar fold): len={}",
-            vals.len()
-        );
         vals.iter()
             .copied()
             .fold(T::zero(), |a, b| a.wrapping_add(&b))
     }
 
     fn wrapping_sum_with_validity(vals: &[Self], mask: &BitMask) -> Self {
-        println!("wrapping_sum_with_validity (SIMD): len={}", vals.len());
         assert!(vals.len() == mask.len());
         let remainder = vals.len() % STRIPE;
         let (rest, main) = vals.split_at(remainder);
@@ -169,10 +164,8 @@ where
 {
     let validity = arr.validity().filter(|_| arr.null_count() > 0);
     if let Some(mask) = validity {
-        println!("wrapping_sum_arr: has validity mask");
         WrappingSum::wrapping_sum_with_validity(arr.values(), &BitMask::from_bitmap(mask))
     } else {
-        println!("wrapping_sum_arr: no validity mask -> wrapping_sum");
         WrappingSum::wrapping_sum(arr.values())
     }
 }

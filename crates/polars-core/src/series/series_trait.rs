@@ -530,6 +530,14 @@ pub trait SeriesTrait:
     fn sum_reduce(&self) -> PolarsResult<Scalar> {
         polars_bail!(opq = sum, self._dtype());
     }
+
+    /// Get the sum of a Series as a new Scalar of a different type
+    ///
+    /// Used to prevent overflow issues with smaller types, such as `{Int8, UInt8, Int16,
+    /// UInt16}`
+    fn cast_sum_reduce(&self) -> PolarsResult<Scalar> {
+        polars_bail!(opq = sum, self._dtype());
+    }
     /// Get the max of the Series as a new Series of length 1.
     fn max_reduce(&self) -> PolarsResult<Scalar> {
         polars_bail!(opq = max, self._dtype());

@@ -403,6 +403,9 @@ macro_rules! impl_dyn_series {
             fn sum_reduce(&self) -> PolarsResult<Scalar> {
                 Ok(ChunkAggSeries::sum_reduce(&self.0))
             }
+            fn cast_sum_reduce(&self) -> PolarsResult<Scalar> {
+                Ok(ChunkAggSeries::cast_sum_reduce(&self.0))
+            }
             fn max_reduce(&self) -> PolarsResult<Scalar> {
                 Ok(ChunkAggSeries::max_reduce(&self.0))
             }

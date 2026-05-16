@@ -27,6 +27,10 @@ pub trait ChunkAggSeries {
     fn sum_reduce(&self) -> Scalar {
         unimplemented!()
     }
+    /// Get the sum of the [`ChunkedArray`] as a new [`Series`] of length 1.
+    fn cast_sum_reduce(&self) -> Scalar {
+        unimplemented!();
+    }
     /// Get the max of the [`ChunkedArray`] as a new [`Series`] of length 1.
     fn max_reduce(&self) -> Scalar {
         unimplemented!()
@@ -82,6 +86,16 @@ where
         println!("fn sum<T>: integer path -> wrapping_sum_arr");
         wrapping_sum_arr(array)
     }
+}
+
+fn cast_sum<T>(array: &ChunkedArray<T>) -> i64
+where
+    T: PolarsNumericType,
+    T::Native: AsPrimitive<i64>,
+{
+    //sum does valitity checkign then calls wrapping_sum_arr
+    println!("in cast sum");
+    0
 }
 
 impl<T> ChunkAgg<T::Native> for ChunkedArray<T>
@@ -272,11 +286,18 @@ impl<T> ChunkAggSeries for ChunkedArray<T>
 where
     T: PolarsNumericType,
     T::Native: WrappingSum,
+    T::Native: AsPrimitive<i64>, // I feel a bit iffy about adding this trait bound
     PrimitiveArray<T::Native>: for<'a> MinMaxKernel<Scalar<'a> = T::Native>,
 {
     fn sum_reduce(&self) -> Scalar {
         println!("ChunkAggSeries::sum_reduce for ChunkedArray");
         let v: Option<T::Native> = self.sum();
+        Scalar::new(T::get_static_dtype(), v.into())
+    }
+
+    fn cast_sum_reduce(&self) -> Scalar {
+        println!("ChunkAggSeries::cast_sum_reduce for ChunkedArray");
+        let v = cast_sum(self);
         Scalar::new(T::get_static_dtype(), v.into())
     }
 

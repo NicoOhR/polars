@@ -816,7 +816,6 @@ impl Series {
         println!("in sum reduce {}", self.dtype());
         use DataType::*;
         match self.dtype() {
-            //Int8 | UInt8 | Int16 | UInt16 => self.cast(&Int64).unwrap().sum_reduce(),
             Int8 | UInt8 | Int16 | UInt16 => self.0.cast_sum_reduce(),
             _ => self.0.sum_reduce(),
         }

@@ -45,6 +45,20 @@ pub trait ChunkAggSeries {
     }
 }
 
+fn cast_sum<T>(array: &PrimitiveArray<T>) -> i64
+where
+    T: NumericNative + NativeType + AsPrimitive<i64>,
+{
+    array
+        .iter()
+        .flatten()
+        .map(|v| -> i64 {
+            let cast: i64 = <T as AsPrimitive<i64>>::as_(*v);
+            cast
+        })
+        .fold(0i64, |acc, v| acc + v)
+}
+
 fn sum<T>(array: &PrimitiveArray<T>) -> T
 where
     T: NumericNative + NativeType + WrappingSum,
@@ -88,20 +102,11 @@ where
     }
 }
 
-fn cast_sum<T>(array: &ChunkedArray<T>) -> i64
-where
-    T: PolarsNumericType,
-    T::Native: AsPrimitive<i64>,
-{
-    //sum does valitity checkign then calls wrapping_sum_arr
-    println!("in cast sum");
-    0
-}
-
 impl<T> ChunkAgg<T::Native> for ChunkedArray<T>
 where
     T: PolarsNumericType,
     T::Native: WrappingSum,
+    T::Native: AsPrimitive<i64>,
     PrimitiveArray<T::Native>: for<'a> MinMaxKernel<Scalar<'a> = T::Native>,
 {
     fn sum(&self) -> Option<T::Native> {
@@ -115,6 +120,13 @@ where
                 .map(sum)
                 .fold(T::Native::zero(), |acc, v| acc + v),
         )
+    }
+
+    fn cast_sum(&self) -> Option<i64> {
+        println!("In cast_sum in ChunkAgg impl for ChunkedArray");
+        let arr = self.downcast_iter().map(cast_sum);
+        let v = arr.fold(0i64, |acc, v| acc + v);
+        Some(v)
     }
 
     fn _sum_as_f64(&self) -> f64 {
@@ -297,7 +309,7 @@ where
 
     fn cast_sum_reduce(&self) -> Scalar {
         println!("ChunkAggSeries::cast_sum_reduce for ChunkedArray");
-        let v = cast_sum(self);
+        let v: Option<i64> = self.cast_sum();
         Scalar::new(T::get_static_dtype(), v.into())
     }
 

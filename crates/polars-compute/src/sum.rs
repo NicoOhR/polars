@@ -84,7 +84,10 @@ where
     T: NativeType + WrappingAdd + Zero + crate::SimdPrimitive,
 {
     fn wrapping_sum(vals: &[Self]) -> Self {
-        println!("wrapping_sum (no validity, scalar fold): len={}", vals.len());
+        println!(
+            "wrapping_sum (no validity, scalar fold): len={}",
+            vals.len()
+        );
         vals.iter()
             .copied()
             .fold(T::zero(), |a, b| a.wrapping_add(&b))

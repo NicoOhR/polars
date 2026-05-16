@@ -15,4 +15,10 @@ fn main() {
     println!("\n--- sum of Int8 without nulls ---");
     let result2: i64 = s2.sum().unwrap();
     println!("result: {result2}");
+
+    // u64 — exercises the standard (non-upcast) path
+    let s3 = Series::new("z".into(), &[1u64, 2, 3, 4, 5, 6]);
+    println!("\n--- sum of UInt64 ---");
+    let result3: u64 = s3.sum().unwrap();
+    println!("result: {result3}");
 }
